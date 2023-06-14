@@ -1,0 +1,40 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Node.js CI
+
+on:
+  push:
+    paths:
+      - "**/*.mermaid"
+      - "**/*.mmd"
+      - "**/*.md"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
+      - name: Install mermaid-cli
+        run: npm i
+
+      - name: Compile Mermaid
+        run: |
+          diff_files=$(git diff --name-only HEAD ${base_branch} -- "${diff_path}" | tr "\n" " ")
+          echo "# diff_files: ${diff_files}"
+          npx -p @mermaid-js/mermaid-cli mmdc -i ${diff_files} -o  ${diff_files}".svg"
+
+      - name: Push mmd
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          # need secrets token
+          git commit -m "mermaid image generated"
+          git push
