@@ -1,7 +1,8 @@
-name: Node.js CI
+name: build mermaid
 
 on:
-  push:
+  pull_request:
+    types: [opened, reopened, synchronize]
     paths:
       - "**/*.mermaid"
       - "**/*.mmd"
@@ -13,13 +14,33 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 16
+      - name: setup node 20
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: 20.x
 
-      - name: Install mermaid-cli
-        run: npm i
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+
+      - name: Run actions/cache@v3
+        uses: actions/cache@v3
+        if: steps.cache.outputs.cache-hit != 'true'
+        id: yarn-cache
+        with:
+          path: .cache/yarn
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Check for Yarn and Install if Needed
+        run: yarn -v || npm install -g yarn
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Install dependencies
+        run: yarn install
 
       - name: Get changed files
         id: changed-files
