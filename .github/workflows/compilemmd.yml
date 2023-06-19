@@ -1,6 +1,3 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
 name: Node.js CI
 
 on:
@@ -24,17 +21,22 @@ jobs:
       - name: Install mermaid-cli
         run: npm i
 
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v36
+
       - name: Compile Mermaid
         run: |
-          diff_files=$(git diff --name-only HEAD ${base_branch} -- "${diff_path}" | tr "\n" " ")
-          echo "# diff_files: ${diff_files}"
-          npx -p @mermaid-js/mermaid-cli mmdc -i ${diff_files} -o  ${diff_files}".svg"
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$file was changed"
+            npx -p @mermaid-js/mermaid-cli mmdc -i $file -o  $file".svg"
+          done
 
       - name: Push mmd
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git add .
-          # need secrets token
-          git commit -m "mermaid image generated"
-          git push
+          git commit -m "Push Mermaid Diagram"
+          git push origin HEAD:${GITHUB_REF}
