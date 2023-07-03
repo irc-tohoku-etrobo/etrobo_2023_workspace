@@ -49,6 +49,7 @@ jobs:
       - name: Compile Mermaid
         run: |
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            echo "$file was changed"
-            npx -p @mermaid-js/mermaid-cli mmdc -i $file -o  $file".svg"
+            if [[ $file == *".mermaid" || $file == *".md" || $file == *".mmd" ]]; then
+              npx -p @mermaid-js/mermaid-cli mmdc -i $file -o  $file".svg"
+            fi
           done
