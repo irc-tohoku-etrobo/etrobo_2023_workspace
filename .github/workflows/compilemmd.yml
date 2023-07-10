@@ -69,15 +69,32 @@ jobs:
       - name: Run actions/checkout@v3
         uses: actions/checkout@v3
 
+      - name: Setup node 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+
       - name: Download Artifact
         uses: actions/download-artifact@v3
         with:
           name: mermaid
           path: mermaid/*.svg
 
-      - name: Deploy to Firebase
-        uses: w9jds/firebase-action@master
-        with:
-          args: deploy --only storage
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Authenticate with Firebase
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: firebase use --token $FIREBASE_TOKEN
+
+      - name: Deploy to Firebase Storage
+        run: firebase deploy --only storage
+
+
+#      - name: Deploy to Firebase
+#        uses: w9jds/firebase-action@master
+#        with:
+#          args: deploy --only storage
+#        env:
+#          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
