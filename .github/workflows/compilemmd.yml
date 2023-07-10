@@ -76,8 +76,7 @@ jobs:
           path: mermaid/*.svg
 
       - name: Deploy to Firebase
-#        uses: w9jds/firebase-action@master
-        uses: docker://w9jds/firebase-action:master
+        uses: w9jds/firebase-action@master
         with:
           args: deploy --only storage
         env:
